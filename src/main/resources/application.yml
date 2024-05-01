@@ -1,0 +1,7 @@
+server:
+  port: 8810
+registry:
+  group-id: default
+  port: 8710
+  node-path: /opt/registry/node1
+  server-list: 192.168.0.100:8710,192.168.0.100:8711,192.168.0.100:8712
