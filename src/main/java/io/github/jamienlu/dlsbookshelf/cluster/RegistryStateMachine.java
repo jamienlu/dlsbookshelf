@@ -110,54 +110,6 @@ public class RegistryStateMachine extends StateMachineAdapter {
         log.error("raft state error: {}",e, e);
     }
 
-    @Override
-    public void onSnapshotSave(SnapshotWriter writer, Closure done) {
-        Snapshot snapshot = JMRegistryService.snapshot();
-        log.info("prepare snapshot data:" + JSON.toJSONString(snapshot));
-        ThreadUtil.submit(() -> {
-            FileOutputStream outputStream = null;
-            try {
-                outputStream = new FileOutputStream(writer.getPath() + "/data");
-                ObjectOutputStream objInput = new ObjectOutputStream(outputStream);
-                objInput.writeObject(snapshot);
-                if (writer.addFile("data")) {
-                    done.run(Status.OK());
-                } else {
-                    done.run(new Status(RaftError.EIO, "Fail to add file to writer"));
-                }
-            } catch (IOException e) {
-                done.run(new Status(RaftError.EIO, "Fail to save snapshot %s", writer.getPath()));
-            }
-        });
-
-
-
-    }
-
-    @Override
-    public boolean onSnapshotLoad(SnapshotReader reader) {
-        if (isLeader()) {
-            log.info("Leader is not supposed to load snapshot");
-            return false;
-        }
-        if (reader.getFileMeta("data") == null) {
-            log.error("Fail to find data file in {}", reader.getPath());
-            return false;
-        }
-        ThreadUtil.submit(() -> {
-            FileInputStream inputStream = null;
-            try {
-                inputStream = new FileInputStream(reader.getPath() + "/data");
-                ObjectInputStream objInput = new ObjectInputStream(inputStream);
-                Snapshot snapshot = (Snapshot) objInput.readObject();
-                JMRegistryService.restore(snapshot);
-            } catch (IOException | ClassNotFoundException e) {
-                log.error("Fail to load snapshot from {}", reader.getPath());
-            }
-        });
-        return true;
-    }
-
     public boolean isLeader() {
         return this.leaderTerm.get() > 0;
     }

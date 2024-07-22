@@ -42,7 +42,7 @@ public class RegistryStorage {
     }
 
     public void recordServerTimestamp(String key, long time) {
-        serverVersions.put(key, time);
+        serverTimestamp.put(key, time);
     }
     public List<InstanceMeta> pullServerInstances(String serverName) {
         return serverInstances.get(serverName);

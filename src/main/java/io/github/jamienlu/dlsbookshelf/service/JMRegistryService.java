@@ -21,12 +21,12 @@ public class JMRegistryService implements RegistryService {
         List<InstanceMeta> metas = registryStorage.pullServerInstances(service);
         if(metas != null && !metas.isEmpty()) {
             if(metas.contains(instance)) {
-                log.info(" ====> instance {} already registered", instance.toUrl());
+                log.info(" ====> instance {} already registered", instance.toPath());
                 instance.setStatus(true);
                 return instance;
             }
         }
-        log.info(" ====> register instance {}", instance.toUrl());
+        log.info(" ====> register instance {}", instance.toPath());
         registryStorage.addInstance(service, instance);
         instance.setStatus(true);
         renew(instance, service);
@@ -40,7 +40,7 @@ public class JMRegistryService implements RegistryService {
         if(metas == null || metas.isEmpty()) {
             return null;
         }
-        log.info(" ====> unregister instance {}", instance.toUrl());
+        log.info(" ====> unregister instance {}", instance.toPath());
         metas.removeIf( m -> m.equals(instance));
         instance.setStatus(false);
         renew(instance, service);
@@ -56,7 +56,7 @@ public class JMRegistryService implements RegistryService {
     public long renew(InstanceMeta instance, String... services) {
         long time = System.currentTimeMillis();
         for (String service : services) {
-            registryStorage.recordServerTimestamp(service+"@"+instance.toUrl(), time);
+            registryStorage.recordServerTimestamp(service+"@"+instance.toPath(), time);
         }
         return time;
     }
